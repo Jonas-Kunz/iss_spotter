@@ -41,9 +41,9 @@ const fetchCoordsByIP = function (ip, callback) {
   });
 };
 
-const fetchISSFlyOverTimes = function (locationobj, callback) {
+const fetchISSFlyOverTimes = function (locationObj, callback) {
   request(
-    `https://iss-flyover.herokuapp.com/json/?lat=${locationobj.latitude}&lon=${locationobj.longitude}`,
+    `https://iss-flyover.herokuapp.com/json/?lat=${locationObj.latitude}&lon=${locationObj.longitude}`,
     (error, response, body) => {
       //console.log("error: ", error);
       //console.log("response: ", response);
@@ -73,4 +73,25 @@ const fetchISSFlyOverTimes = function (locationobj, callback) {
   );
 };
 
-module.exports = { fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes };
+const nextISSTimesForMyLocation = function (callback) {
+  fetchMyIP((error, ip) => {
+    if (error) {
+      return callback(error, null);
+    }
+    fetchCoordsByIP(ip, (error, locationObj) => {
+      if (error) {
+        return callback(error,null);
+      }
+      fetchISSFlyOverTimes(locationObj,(error, passes) => {
+        if (error) {
+          return callback(error, null);
+        }
+        callback(null, passes)
+      })
+    })
+  })
+
+
+}
+
+module.exports = { fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes, nextISSTimesForMyLocation };
